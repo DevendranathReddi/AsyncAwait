@@ -34,7 +34,7 @@ class AsyncLetViewController: UIViewController {
         imageView2.reset()
         imageView3.reset()
         imageView4.reset()
-        
+        loadingIndicator.startAnimating()
         Task {
             async let image1 = HTTPClient.shared.loadImage(number: 1)
             async let image2 = HTTPClient.shared.loadImage(number: 2)
@@ -42,7 +42,7 @@ class AsyncLetViewController: UIViewController {
             async let image4 = HTTPClient.shared.loadImage(number: 4)
             
             let images =  [try await image1, try await image2, try await image3, try await image4]
-            
+            loadingIndicator.stopAnimating()
             imageView1.image = images[0]
             imageView2.image = images[1]
             imageView3.image = images[2]
@@ -55,10 +55,11 @@ class AsyncLetViewController: UIViewController {
         imageView2.reset()
         imageView3.reset()
         imageView4.reset()
-        
+        loadingIndicator.startAnimating()
         let vm = ViewModel()
         Task {
-            let images = try await vm.fetchImages()
+            let images = try await vm.fetchImagesWithTaskGroup()
+            loadingIndicator.stopAnimating()
             imageView1.image = images[0]
             imageView2.image = images[1]
             imageView3.image = images[2]
@@ -69,7 +70,7 @@ class AsyncLetViewController: UIViewController {
 
 class ViewModel {
     
-    func fetchImages() async throws -> [UIImage] {
+    func fetchImagesWithTaskGroup() async throws -> [UIImage] {
         
         return try await withThrowingTaskGroup(of: UIImage.self) { group -> [UIImage] in
             group.addTask(operation: {
